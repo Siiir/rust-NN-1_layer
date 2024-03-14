@@ -1,0 +1,19 @@
+
+[package]
+name = "perceptron"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+derive_more = "0.99.17"
+nalgebra = "0.32.4"
+num-rational = "0.4.1"
+
+[profile.comptime]
+inherits = "dev"
+opt-level = 0
+debug = 0
+strip = "none"
+lto = false
+codegen-units = 256
+incremental = true
