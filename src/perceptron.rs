@@ -24,7 +24,7 @@ impl<const D: usize> Default for Perceptron<D> {
     }
 }
 impl<const D: usize> Perceptron<D> {
-    pub const ALPHA: Float = 1.0;
+    pub const ALPHA: Float = 0.1;
     pub const BETA: Float = Self::ALPHA;
 
     // CRUD-R: Properties

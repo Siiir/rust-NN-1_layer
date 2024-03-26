@@ -6,10 +6,12 @@ pub mod nn;
 pub use perceptron::Perceptron;
 pub mod perceptron;
 
+#[allow(deprecated)]
 pub use app::{
     args::AppArgs,
     cfg::{app_cfg, AppCfg, APP_CFG},
 };
+#[deprecated]
 pub mod app;
 
 pub mod util;
@@ -18,8 +20,11 @@ use class_expectation::ClassificationExpectation;
 mod class_expectation;
 
 pub fn create_classifier(
-    classified_irises: Vec<ic::ClassifiedIris>,
+    mut classified_irises: Vec<ic::ClassifiedIris>,
 ) -> impl Fn(ic::UnclassifiedIris) -> ic::ClassifiedIris {
+    use rand::prelude::*;
+    classified_irises.shuffle(&mut thread_rng());
+
     let mut nn = crate::OneLayerNN::<2, 4>::default();
     nn.fit_to::<_, _, _, ClassificationExpectation>(
         classified_irises
@@ -29,7 +34,7 @@ pub fn create_classifier(
             .iter()
             .map(|ci| ci.classification)
             .map(ClassificationExpectation::from),
-        3,
+        10,
     )
     .unwrap();
 
