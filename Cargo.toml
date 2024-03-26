@@ -19,7 +19,7 @@ clap = { version = "4.5.3", features = ["derive"] }
 anyhow = "1.0.81"
 tabled = "0.15.0"
 
-[profile.comptime]
+[profile.comp_time]
 inherits = "dev"
 opt-level = 0
 debug = 0
