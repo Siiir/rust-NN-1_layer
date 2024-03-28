@@ -6,13 +6,13 @@ use num_traits::{one, zero, One, Zero};
 
 use crate::util::{BoolExpect, BoolExpectation, Correctness};
 
-pub type Float = f32;
-pub type PerVec<const D: usize> = na::SVector<Float, D>;
+pub type PerFloat = f32;
+pub type PerVec<const D: usize> = na::SVector<PerFloat, D>;
 
 #[derive(Clone, Debug)]
 pub struct Perceptron<const D: usize> {
     wages: PerVec<D>,
-    theta: Float,
+    theta: PerFloat,
 }
 
 impl<const D: usize> Default for Perceptron<D> {
@@ -24,19 +24,18 @@ impl<const D: usize> Default for Perceptron<D> {
     }
 }
 impl<const D: usize> Perceptron<D> {
-    pub const ALPHA: Float = 0.1;
-    pub const BETA: Float = Self::ALPHA;
+    pub const ALPHA: PerFloat = 0.1;
 
     // CRUD-R: Properties
 
     /// Activation function.
-    pub fn activation(&self, value: Float) -> bool {
+    pub fn activation(&self, value: PerFloat) -> bool {
         value >= self.theta
     }
     /// Returns decision for given [`input`].
     pub fn decide_for(&self, input: &PerVec<D>) -> bool {
-        let dot_prod = self.wages.transpose() * input;
-        self.activation(dot_prod.x)
+        let dot_prod = crate::util::sf32_vec::dot(&self.wages, input);
+        self.activation(dot_prod)
     }
     /// Returns accuracy this classifier has for the given test data.
     pub fn accuracy_for<'i, II, EI, E>(&self, inputs: II, expectations: EI) -> Option<Ratio<u64>>
@@ -61,20 +60,31 @@ impl<const D: usize> Perceptron<D> {
     where
         E: BoolExpect,
     {
-        let decision = self.decide_for(input);
+        let prediction = self.decide_for(input);
         match expectation.expectation() {
             BoolExpectation::Expect(expectation) => {
-                if expectation.is_met_by(decision) {
+                if expectation.is_met_by(prediction) {
                     return Correctness::Correct; // Correct, no need to improve
                 }
-                let [decision, expected] = [decision, expectation].map(Float::from);
+                let translation_dir = match [expectation, prediction] {
+                    [false, true] => -1.,
+                    [true, false] => 1.,
+                    _ => {
+                        // Do nothing, nothing to improve
+                        return Correctness::Correct;
+                    }
+                };
+                let translation_multiplier = translation_dir * Self::ALPHA;
                 // Update self
-                self.wages -= (decision - expected) * Self::ALPHA * input;
-                self.theta += (decision - expected) * Self::BETA; // Input is -1.
+                crate::util::sf32_vec::add_assign(
+                    &mut self.wages,
+                    &(translation_multiplier * input),
+                );
+                self.theta -= translation_multiplier; // Input is -1.
                 Correctness::Incorrect // BUT improved
             }
-            _ => {
-                // Do, nothing
+            BoolExpectation::NoExpect => {
+                // No expectation ==> nothing to do ==> everything is ok
                 Correctness::Correct
             }
         }

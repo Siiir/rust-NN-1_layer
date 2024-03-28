@@ -9,7 +9,7 @@ fn main() -> anyhow::Result<()> {
     // Reading iris data.
     let training_irises = read::training_irises()?;
     // Creating classifier using the classified data.
-    let iris_classifier = perc_ic::create_classifier(training_irises);
+    let iris_classifier = perc_ic::create_classifier(training_irises)?;
     if ic::app_cfg().run_accuracy_measure {
         ic::app::run_accuracy_measure(&iris_classifier)?;
     }
