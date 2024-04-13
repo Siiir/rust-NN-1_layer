@@ -15,6 +15,8 @@ impl<I: PrimInt> IntExpect for I {
     }
 
     fn bit_expectation(&self, idx: usize) -> Self::BoolExpectation {
-        !(*self << idx).is_zero()
+        let mut bit_mask = Self::one();
+        bit_mask = bit_mask << idx;
+        !(*self & bit_mask).is_zero()
     }
 }
