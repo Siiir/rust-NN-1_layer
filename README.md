@@ -1,3 +1,12 @@
+# NN-1_layer
+**1 layer neural network** with use case. 
+
+## Contest
+### The library
+contains implementation of **1 layer Neural Network** and **perceptron**, which is used to implement the NN.
+### The app
+is an **iris classifier** using the library.
+
 ## Download
 1. `git clone https://github.com/Siiir/rust-NN-1_layer`
    
